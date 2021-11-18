@@ -1,36 +1,15 @@
 #include <iostream>
-#include "./core/nzm-socket.h"
-#include "./core/nzm-thread.h"
-#include "./core/nzm-thread.h"
+#include "./core/nzm-controller.h"
 
 using namespace std;
 
-void HandleRequest(void *data){
-    Task *task = (Task *)data;
-    
-    cout << "new task started" << endl;
-
-    delete task;
-}
-
 int main(){
-    NzmScoket *sock = new NzmScoket((char *)"0.0.0.0", 8099);
-
-    ThreadPool *pool = new ThreadPool(10);
-
-    if(!sock->Start() || !sock->Listen()){
-        cout << sock->GetLastError() << endl;
-        return 1;
+    NzmController *con = new NzmController((char *)"0.0.0.0", 8099);
+    if(!con->LoadConfig()){
+        cout << "加载配置文件失败" << endl;
     }
-
-    while(true){
-        SocketClient *client = sock->Accept();
-        SocketTask *task = new SocketTask(HandleRequest, NULL);
-        task->SetData((void *)task);
-        task->SetSocketClinet(client);
-
-        pool->AppendTask(task);
+    if(!con->Run()){
+        cout << "服务器启动失败" << endl;
     }
-    
     return 0;
 }

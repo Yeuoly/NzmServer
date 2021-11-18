@@ -31,8 +31,17 @@ public:
     ~SocketTask();
 
     void SetSocketClinet(SocketClient *socket_clinet);
+
+    SocketClient* GetSocketClient();
 private:
     SocketClient *socket_client;
 };
+
+class ServerTask : public Task {
+public:
+    using Task::Task;
+
+    
+}
 
 #endif

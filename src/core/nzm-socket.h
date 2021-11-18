@@ -14,11 +14,11 @@
 #define SOCKET_ERROR_CODE_APPLY_FAILED 2
 #define SOCKET_ERROR_CODE_LISTEN_FAILED 3
 
-class NzmScoket {
+class NzmSocket {
 public:
-    NzmScoket();
+    NzmSocket();
 
-    NzmScoket(char *ip, short port);
+    NzmSocket(char *ip, short port);
 
     bool Start();
 

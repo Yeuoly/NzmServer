@@ -29,6 +29,10 @@ void SocketTask::SetSocketClinet(SocketClient *clinet){
     this->socket_client = clinet;
 }
 
+SocketClient* SocketTask::GetSocketClient(){
+    return socket_client;
+}
+
 SocketTask::~SocketTask(){
     if(socket_client){
         delete socket_client;
