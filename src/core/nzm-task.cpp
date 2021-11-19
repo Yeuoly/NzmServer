@@ -38,3 +38,7 @@ SocketTask::~SocketTask(){
         delete socket_client;
     }
 }
+
+void SocketTask::Fail(){
+    socket_client->SendServiceUnavalable();
+}

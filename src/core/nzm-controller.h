@@ -9,8 +9,9 @@
 
 class NzmController {
 public:
-    NzmController(char *ip, short port);
     NzmController();
+    NzmController(char *ip, short port);
+
     bool LoadConfig();
 
     bool Run();
@@ -19,11 +20,11 @@ public:
 
     static void HandleServer(void *data);
 private:
-    NzmSocket *sock;
+    ThreadPool      *pool;
+    NzmConfig       *config;
 
-    ThreadPool *pool;
-
-    NzmConfig *config;
+    pthread_cond_t   controller_cond;
+    pthread_mutex_t  controller_mutex;
 
     char ip[24];
     short port;

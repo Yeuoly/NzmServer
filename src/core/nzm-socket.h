@@ -24,6 +24,8 @@ public:
 
     bool Listen();
 
+    void ClearClient(int fd);
+
     SocketClient* Accept();
 
     int GetLastError();

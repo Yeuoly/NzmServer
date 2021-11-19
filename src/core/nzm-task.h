@@ -33,6 +33,12 @@ public:
     void SetSocketClinet(SocketClient *socket_clinet);
 
     SocketClient* GetSocketClient();
+
+    //任务执行失败时调用
+    void Fail();
+
+    //所属SOCKET父级
+    void *parent_sock;
 private:
     SocketClient *socket_client;
 };
@@ -41,7 +47,9 @@ class ServerTask : public Task {
 public:
     using Task::Task;
 
-    
-}
+    void *pool;
+
+    void *server;
+};
 
 #endif

@@ -4,7 +4,7 @@
 
 NzmSocket::NzmSocket(){}
 
-NzmSocket::NzmSocket(char *ip, short port){
+NzmSocket::NzmSocket(char *ip, short port) : NzmSocket(){
     this->socket_port = port;
     mempcpy(socket_ip_str, ip, 23);
 }
@@ -49,4 +49,10 @@ SocketClient* NzmSocket::Accept() {
 
 int NzmSocket::GetLastError(){
     return socket_last_error;
+}
+
+void NzmSocket::ClearClient(int fd){
+    if(socket_clients[fd]){
+        socket_clients.erase(fd);
+    }
 }

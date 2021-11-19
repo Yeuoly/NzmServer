@@ -1,4 +1,5 @@
 #include "./nzm-thread.h"
+#include "../utils/debug.h"
 
 pthread_mutex_t ThreadPool::thread_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t ThreadPool::thread_cond = PTHREAD_COND_INITIALIZER;
@@ -14,6 +15,9 @@ ThreadPool::ThreadPool(int default_thread_count){
 
 void *ThreadPool::ThreadCallbackFunc(void *lp){
     pthread_t current_pid = pthread_self();
+
+    Debug::Log("[THREAD_POOL] thread started");
+
     while (true){
         //atomic
         pthread_mutex_lock(&thread_mutex);
@@ -49,7 +53,6 @@ int ThreadPool::CreateThreads(){
 bool ThreadPool::AppendTask(Task *task){
     pthread_mutex_lock(&thread_mutex);
     if(task_queue.max_size() == task_queue.size()){
-        task->Fail();
         return false;
     }
 

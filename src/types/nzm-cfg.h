@@ -23,9 +23,9 @@ public:
     NzmServer* GetServerList();
 private:
     NzmServer *server_list;
-    char *cfg_path = (char *)NZM_CFG_PATH;
-    int cfg_max_server = NZM_CFG_MAX_SERVER;
-    int server_size = 0;
+    char *cfg_path;
+    int cfg_max_server;
+    int server_size;
 };
 
 #endif
