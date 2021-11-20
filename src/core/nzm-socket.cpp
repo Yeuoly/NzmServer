@@ -56,3 +56,15 @@ void NzmSocket::ClearClient(int fd){
         socket_clients.erase(fd);
     }
 }
+
+void NzmSocket::SetServerConfig(NzmServerConfig *server_config){
+    this->server_config = server_config;
+}
+
+NzmServerConfig* NzmSocket::GetServerConfig(){
+    return server_config;
+}
+
+int NzmSocket::IsExtAvaliable(char *path){
+    return HTTP_PATH_EXT_NORMAL;
+}

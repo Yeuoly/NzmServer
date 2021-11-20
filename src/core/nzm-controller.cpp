@@ -1,4 +1,5 @@
 #include "./nzm-controller.h"
+#include "../utils/parser.h"
 #include <cstring>
 #include <iostream>
 
@@ -23,7 +24,7 @@ bool NzmController::Run(){
     pool = new ThreadPool(20);
 
     int server_size = config->GetServerSize();
-    NzmServer *list = config->GetServerList();
+    NzmServerConfig *list = config->GetServerList();
     ServerTask **server_tasks = new ServerTask*[server_size];
 
     for(int i = 0; i < server_size; i++){
@@ -39,6 +40,11 @@ bool NzmController::Run(){
     pthread_mutex_lock(&controller_mutex);
     pthread_cond_wait(&controller_cond, &controller_mutex);
 
+    for(int i = 0; i < server_size; i++){
+        delete server_tasks[i];
+    }
+
+    delete[] server_tasks;
     return true;
 }
 
@@ -46,7 +52,10 @@ void NzmController::HandleRequest(void *data){
     SocketTask *task = (SocketTask *)data;
     SocketClient *client = task->GetSocketClient();
     HttpClient *http = new HttpClient();
+    NzmSocket *sock = (NzmSocket *)task->parent_sock;
+    NzmServerConfig *server_config = sock->GetServerConfig();
     char *path, *params;
+    int ext_status;
 
     //接收HTTP协议头与URI
     char *buf = new char[1024];
@@ -148,19 +157,50 @@ void NzmController::HandleRequest(void *data){
     }
 
     buf_pos += 10;
+
+    //analysis path and
+    if(path[0] != '/'){
+        client->SendNotImplemented();
+        goto end;
+    }
+
+    //检测是否允许目录穿越
+    if(!server_config->allow_path_cross && !IsPathInSize(path, strlen(path))){
+        client->SendForbidden();
+        goto end;
+    }
+
+    //检测当前后缀是否在允许范围内
+    if(HTTP_PATH_EXT_BANNED == (ext_status = sock->IsExtAvaliable(path))){
+        client->SendForbidden();
+        goto end;
+    }
+
+    //如果不是GCI后缀的话就直接读文件
+    switch(ext_status){
+    case HTTP_PATH_EXT_CGI:
+
+        break;
+    case HTTP_PATH_EXT_NORMAL:
+        if(client->SendNormalFile(path, server_config->root_path) == HTTP_FILE_NOT_FOUND){
+            client->SendNotFound();
+            goto end;
+        }
+        break;
+    }
 end:
     //执行完任务以后清理资源
-    NzmSocket *sock = (NzmSocket *)task->parent_sock;
     sock->ClearClient(client->GetFd());
     delete[] buf;
-    delete task;
+    delete task; //this will delete socket-client also
 }
 
 void NzmController::HandleServer(void *data){
     ServerTask *task = (ServerTask *)data;
-    NzmServer *server = (NzmServer *)task->server;
+    NzmServerConfig *server_config = (NzmServerConfig *)task->server;
     ThreadPool *pool = (ThreadPool *)task->pool;
-    NzmSocket *sock = new NzmSocket(server->ip, server->port);
+    NzmSocket *sock = new NzmSocket(server_config->ip, server_config->port);
+    sock->SetServerConfig(server_config);
 
     if(!sock->Start() || !sock->Listen()){
         cout << "开启监听失败" << endl;
@@ -179,4 +219,6 @@ void NzmController::HandleServer(void *data){
             delete task;
         }
     }
+
+    delete sock;
 }

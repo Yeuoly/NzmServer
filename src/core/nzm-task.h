@@ -39,6 +39,7 @@ public:
 
     //所属SOCKET父级
     void *parent_sock;
+
 private:
     SocketClient *socket_client;
 };

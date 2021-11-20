@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <unistd.h>
 
 #define HTTP_VERSION_1_0 0x0
 #define HTTP_VERSION_1_1 0x1
@@ -14,6 +15,10 @@
 #define HTTP_METHOD_POST 0x2
 #define HTTP_METHOD_PUT 0x3
 #define HTTP_METHOD_DELETE 0x4
+
+#define HTTP_FILE_NOT_FOUND 404
+#define HTTP_FILE_PATH_ERR 1
+#define HTTP_FILE_OK 
 
 struct HttpClient {
     char version;
@@ -49,8 +54,25 @@ public:
     //请求方法不允许
     void SendNotImplemented();
 
+    //403
+    void SendForbidden();
+
+    //404
+    void SendNotFound();
+
+    //200
+    void SendOk();
+
+    //发送普通文件，返回码
+    int SendNormalFile(char *relative_path, char *root);
+
+    void Close();
+
+    char* GetClientIp();
 private:
-    struct sockaddr_in *addr;
+    
+
+    sockaddr_in *addr;
 
     int fd;
 
