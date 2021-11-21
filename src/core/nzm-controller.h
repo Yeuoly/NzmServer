@@ -16,9 +16,15 @@ public:
 
     bool Run();
 
+    //用于处理HTTP请求
     static void HandleRequest(void *data);
 
+    //用于处理服务器
     static void HandleServer(void *data);
+
+    //用于处理SOCKET请求
+    static void HandleSocket(void *data);
+
 private:
     ThreadPool      *pool;
     NzmConfig       *config;

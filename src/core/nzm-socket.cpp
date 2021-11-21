@@ -68,3 +68,11 @@ NzmServerConfig* NzmSocket::GetServerConfig(){
 int NzmSocket::IsExtAvaliable(char *path){
     return HTTP_PATH_EXT_NORMAL;
 }
+
+void NzmSocket::SetThreadPool(void *pool){
+    this->pool = pool;
+}
+
+void *NzmSocket::GetThreadPool(){
+    return pool;
+}

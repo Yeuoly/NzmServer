@@ -18,6 +18,8 @@ struct NzmServerConfig {
     bool allow_path_cross;
     //根目录
     char *root_path;
+    //每个请求的最长时间ms
+    unsigned long timeout;
 };
 
 //全局配置

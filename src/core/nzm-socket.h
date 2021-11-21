@@ -40,6 +40,10 @@ public:
     int GetLastError();
 
     int IsExtAvaliable(char *path);
+
+    void *GetThreadPool();
+
+    void SetThreadPool(void *pool);
 protected:
 
 private:
@@ -51,6 +55,7 @@ private:
 
     int                           socket_last_error = 0;
     NzmServerConfig              *server_config;
+    void                         *pool;
 };
 
 #endif

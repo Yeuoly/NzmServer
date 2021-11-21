@@ -2,6 +2,9 @@
 #include "../utils/parser.h"
 #include <cstring>
 #include <iostream>
+#include <signal.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -46,6 +49,23 @@ bool NzmController::Run(){
 
     delete[] server_tasks;
     return true;
+}
+
+void NzmController::HandleSocket(void *data){
+    //控制线程运行时间，如果超时的话就重启线程，那么这个当前线程执行的任务都会被终止
+    SocketTask *task = (SocketTask *)data;
+    SocketClient *client = task->GetSocketClient();
+    NzmSocket *sock = (NzmSocket *)task->parent_sock;
+    pthread_t pid = pthread_self();
+    bool finished = false;
+    ThreadPool *pool = (ThreadPool *)((NzmSocket *)(task->parent_sock))->GetThreadPool();
+    
+    HandleRequest(data);
+
+    finished = true;
+    //执行完任务以后清理资源
+    sock->ClearClient(client->GetFd());
+    delete task; //this will delete socket-client also
 }
 
 void NzmController::HandleRequest(void *data){
@@ -189,10 +209,7 @@ void NzmController::HandleRequest(void *data){
         break;
     }
 end:
-    //执行完任务以后清理资源
-    sock->ClearClient(client->GetFd());
     delete[] buf;
-    delete task; //this will delete socket-client also
 }
 
 void NzmController::HandleServer(void *data){
@@ -200,6 +217,7 @@ void NzmController::HandleServer(void *data){
     NzmServerConfig *server_config = (NzmServerConfig *)task->server;
     ThreadPool *pool = (ThreadPool *)task->pool;
     NzmSocket *sock = new NzmSocket(server_config->ip, server_config->port);
+    sock->SetThreadPool(pool);
     sock->SetServerConfig(server_config);
 
     if(!sock->Start() || !sock->Listen()){
@@ -207,12 +225,11 @@ void NzmController::HandleServer(void *data){
     }
 
     while(true){
-        SocketTask *task = new SocketTask(HandleRequest, NULL);
+        SocketTask *task = new SocketTask(HandleSocket, NULL);
         SocketClient *client = sock->Accept();
         task->parent_sock = sock;
         task->SetData((void *)task);
         task->SetSocketClinet(client);
-        
         if(!pool->AppendTask(task)){
             task->Fail();
             sock->ClearClient(client->GetFd());

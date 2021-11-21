@@ -24,6 +24,13 @@ private:
     void (* fail_cb)();
 };
 
+class RecycleThreadTask : public Task {
+public:
+    using Task::Task;
+
+    pthread_t pid;
+};
+
 class SocketTask : public Task {
 public:
     using Task::Task;
